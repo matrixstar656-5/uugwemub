@@ -27,9 +27,14 @@
     });
 
     socket.on('message', function(msg) {
+      const messages = document.getElementById('messages');
+      const isAtBottom = messages.scrollHeight - messages.scrollTop <= messages.clientHeight + 5;
       const item = document.createElement('li');
       item.textContent = msg;
-      document.getElementById('messages').appendChild(item);
+      messages.appendChild(item);
+      if (isAtBottom) {
+        messages.scrollTop = messages.scrollHeight;
+      }
     });
 
     function sendMessage() {
