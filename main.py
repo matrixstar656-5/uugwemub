@@ -5,6 +5,7 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
+eventlet.monkey_patch()
 
 @app.route('/')
 def index():
@@ -17,4 +18,4 @@ def handle_message(msg):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3000))
-    socketio.run(app, host='0.0.0.0', port=port, debug=False)
+    socketio.run(app, host='0.0.0.0', port=port)
