@@ -21,7 +21,13 @@
 
   <script>
     const socket = io();
-
+    
+    window.onload = function () {
+      while (!username) {
+        username = prompt("Enter your username:");
+      }
+    };
+    
     socket.on('connect', () => {
       console.log('Connected to server');
     });
@@ -40,8 +46,8 @@
     function sendMessage() {
       const input = document.getElementById('message');
       const text = input.value.trim();
-      if (text !== "") {
-        socket.send(text);
+      if (text !== '') {
+        socket.send(`${username}: ${text}`);
         input.value = '';
       }
     }
