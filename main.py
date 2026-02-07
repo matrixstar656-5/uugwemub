@@ -30,6 +30,7 @@ def handle_join(username):
 
     emit('message', f'--- {username} joined ---', broadcast=True)
     emit('user_list', list(users.values()), broadcast=True)
+    emit('user_joined', broadcast=True)
 
 
 @socketio.on('disconnect')
