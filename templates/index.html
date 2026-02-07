@@ -157,6 +157,23 @@
       }
     }
 
+    function playPing() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.value = 900;
+
+      gain.gain.value = 0.1;
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    }
     function sendMessage() {
       const input = document.getElementById('message');
       const text = input.value.trim();
@@ -188,6 +205,10 @@
       });
     });
 
+    socket.on('user_joined', function() {
+      playPing();
+    });
+
     // Enter to send message
     document.getElementById('message').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
@@ -205,5 +226,6 @@
 
 </body>
 </html>
+
 
 
