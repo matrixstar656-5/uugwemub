@@ -210,7 +210,7 @@ function sendMessage() {
 socket.on('message', function(msg) {
   const messages = document.getElementById('messages');
   const item = document.createElement('li');
-  const imageRegex = /(https?:\/\/[^\s]+\.(png|jpg|jpeg|gif|webp))/gi;
+  const imageRegex = /(https?:\/\/[^\s]+\.(png|jpg|jpeg|gif|webp)(\?[^\s]*)?)/gi;
   if (imageRegex.test(msg)) {
     const parts = msg.split(imageRegex);
     parts.forEach(part => {
