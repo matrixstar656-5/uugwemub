@@ -165,6 +165,12 @@
     const socket = io();
     let username = '';
 
+    socket.on('connect', () => {
+      if (username) {
+        socket.emit('join', username);
+      }
+    });
+    
     function submitUsername() {
       const input = document.getElementById('username-input');
       const overlay = document.getElementById('username-overlay');
