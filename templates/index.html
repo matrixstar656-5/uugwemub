@@ -158,25 +158,22 @@ socket.on('you_are_host', () => {
 // ===== HOST REQUEST UI =====
 
 socket.on('approval_request', ({ sid, username }) => {
+  playPing();
   const list = document.getElementById('requests');
-
   const li = document.createElement('li');
   li.textContent = username + ' ';
-
   const approveBtn = document.createElement('button');
   approveBtn.textContent = '✔';
   approveBtn.onclick = () => {
     socket.emit('approve_user', sid);
     li.remove();
   };
-
   const rejectBtn = document.createElement('button');
   rejectBtn.textContent = '✖';
   rejectBtn.onclick = () => {
     socket.emit('reject_user', sid);
     li.remove();
   };
-
   li.appendChild(approveBtn);
   li.appendChild(rejectBtn);
   list.appendChild(li);
