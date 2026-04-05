@@ -211,22 +211,35 @@ socket.on('message', function(msg) {
   const messages = document.getElementById('messages');
   const item = document.createElement('li');
   const imageRegex = /(https?:\/\/[^\s]+\.(png|jpg|jpeg|gif|webp)(\?[^\s]*)?)/gi;
-  if (msg.match(imageRegex)) {
-    const parts = msg.split(imageRegex);
-    parts.forEach(part => {
-      if (part.match(imageRegex)) {
-        const img = document.createElement('img');
-        img.src = part;
-        img.style.maxWidth = '300px';
-        img.style.display = 'block';
-        img.style.marginTop = '4px';
-        item.appendChild(img);
-      } else if (part.trim() !== '') {
+  let lastIndex = 0;
+  let matches = [...msg.matchAll(imageRegex)];
+  if (matches.length > 0) {
+    matches.forEach(match => {
+      const url = match[0];
+      const textBefore = msg.slice(lastIndex, match.index);
+      if (textBefore.trim()) {
         const span = document.createElement('span');
-        span.textContent = part;
+        span.textContent = textBefore;
         item.appendChild(span);
       }
+      const img = document.createElement('img');
+      img.src = url;
+      img.style.maxWidth = '300px';
+      img.style.display = 'block';
+      img.style.marginTop = '4px';
+      img.style.borderRadius = '6px';
+      img.loading = 'lazy';
+      img.onclick = () => window.open(img.src, '_blank');
+      img.style.cursor = 'pointer';
+      item.appendChild(img);
+      lastIndex = match.index + url.length;
     });
+    const remaining = msg.slice(lastIndex);
+    if (remaining.trim()) {
+      const span = document.createElement('span');
+      span.textContent = remaining;
+      item.appendChild(span);
+    }
   } else {
     item.textContent = msg;
   }
