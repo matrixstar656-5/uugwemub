@@ -11,8 +11,6 @@
       height: 100vh;
     }
 
-    /* ===== Layout ===== */
-
     .layout {
       display: flex;
       height: 100vh;
@@ -22,11 +20,9 @@
 
     .chat {
       flex: 1;
-      display: flex;
+      display: none; /* hidden by default */
       flex-direction: column;
       padding: 10px;
-      background: #111;
-      color: #eee;
     }
 
     .sidebar {
@@ -35,8 +31,6 @@
       background: #1a1a1a;
       padding: 10px;
     }
-
-    /* ===== Messages ===== */
 
     #messages {
       background: #000;
@@ -50,7 +44,6 @@
 
     #messages li {
       padding: 4px 6px;
-      color: #ddd;
     }
 
     .input-row {
@@ -59,196 +52,190 @@
       margin-top: 6px;
     }
 
-    #users {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
     input, button {
       background: #222;
       color: #eee;
       border: 1px solid #555;
     }
 
-    input::placeholder {
-      color: #888;
-    }
-
-    button:hover {
-      background: #333;
-    }
-
-    /* ===== Username overlay ===== */
-
     #username-overlay {
       position: fixed;
       inset: 0;
       background: black;
       color: white;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       z-index: 1000;
-      transition: opacity 0.3s ease;
-    }
-    
-    #username-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
     }
 
     .username-box {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
       gap: 10px;
+      text-align: center;
     }
 
-    .username-box h2 {
-      margin: 0;
-    }
-
-    .username-box input,
-    .username-box button {
-      padding: 10px;
-      font-size: 16px;
-      width: 200px;
+    #requests {
+      display: none; /* hidden unless host */
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Username screen -->
-  <div id="username-overlay">
-    <div class="username-box">
-      <h2>Enter Username</h2>
-      <input type="text" id="username-input" placeholder="Username" />
-      <button onclick="submitUsername()">Enter</button>
+<div id="username-overlay">
+  <div class="username-box">
+    <h2 id="overlay-text">Enter Username</h2>
+    <input type="text" id="username-input" placeholder="Username" />
+    <button onclick="submitUsername()">Enter</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <div class="chat" id="chat">
+    <h1>uugwemubwem</h1>
+    <h2>hecho por matrixstar656_5</h2>
+
+    <ul id="messages"></ul>
+
+    <div class="input-row">
+      <input id="message" autocomplete="off" />
+      <button onclick="sendMessage()">Send</button>
     </div>
   </div>
 
+  <div class="sidebar">
+    <h3>Online</h3>
+    <ul id="users"></ul>
 
-  <!-- Layout -->
-  <div class="layout">
-
-    <!-- Chat -->
-    <div class="chat">
-      <h1>uugwemubwem</h1>
-      <h2>hecho por matrixstar656_5</h2>
-
-      <ul id="messages"></ul>
-
-      <div class="input-row">
-        <input id="message" autocomplete="off" />
-        <button onclick="sendMessage()">Send</button>
-      </div>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <h3>Online</h3>
-      <ul id="users"></ul>
-    </div>
-
+    <h3>Requests</h3>
+    <ul id="requests"></ul>
   </div>
 
+</div>
 
-  <!-- ===== JS ===== -->
+<script>
+const socket = io();
 
-  <script>
-    const socket = io();
-    let username = '';
+let username = '';
+let joined = false;
 
-    socket.on('connect', () => {
-      if (username) {
-        socket.emit('join', username);
-      }
-    });
-    
-    function submitUsername() {
-      const input = document.getElementById('username-input');
-      const overlay = document.getElementById('username-overlay');
-      const name = input.value.trim();
+const chat = document.getElementById('chat');
+const overlay = document.getElementById('username-overlay');
+const overlayText = document.getElementById('overlay-text');
 
-      if (name) {
-        username = name;
-        socket.emit('join', username);
-        overlay.classList.add('hidden');
-      }
-    }
+// Prevent duplicate joins
+socket.on('connect', () => {
+  if (username && !joined) {
+    socket.emit('join', username);
+    joined = true;
+  }
+});
 
-    function playPing() {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+// ===== STATES =====
 
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+socket.on('waiting', () => {
+  overlayText.textContent = 'Waiting for approval...';
+});
 
-      osc.type = 'sine';
-      osc.frequency.value = 900;
+socket.on('approved', () => {
+  overlay.style.display = 'none';
+  chat.style.display = 'flex';
+});
 
-      gain.gain.value = 0.1;
+socket.on('rejected', () => {
+  overlayText.textContent = 'Rejected. Try another username.';
+});
 
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+// Host event (YOU MUST EMIT THIS FROM SERVER)
+socket.on('you_are_host', () => {
+  overlay.style.display = 'none';
+  chat.style.display = 'flex';
+  document.getElementById('requests').style.display = 'block';
+});
 
-      osc.start();
-      osc.stop(ctx.currentTime + 0.12);
-    }
-    function sendMessage() {
-      const input = document.getElementById('message');
-      const text = input.value.trim();
+// ===== HOST REQUEST UI =====
 
-      if (text !== '') {
-        socket.send(username + ': ' + text);
-        input.value = '';
-      }
-    }
+socket.on('approval_request', ({ sid, username }) => {
+  const list = document.getElementById('requests');
 
-    // Receive chat messages
-    socket.on('message', function(msg) {
-      const messages = document.getElementById('messages');
-      const item = document.createElement('li');
-      item.textContent = msg;
-      messages.appendChild(item);
-      messages.scrollTop = messages.scrollHeight;
-    });
+  const li = document.createElement('li');
+  li.textContent = username + ' ';
 
-    // Receive user list
-    socket.on('user_list', function(list) {
-      const users = document.getElementById('users');
-      users.innerHTML = '';
+  const approveBtn = document.createElement('button');
+  approveBtn.textContent = '✔';
+  approveBtn.onclick = () => {
+    socket.emit('approve_user', sid);
+    li.remove();
+  };
 
-      list.forEach(u => {
-        const li = document.createElement('li');
-        li.textContent = u;
-        users.appendChild(li);
-      });
-    });
+  const rejectBtn = document.createElement('button');
+  rejectBtn.textContent = '✖';
+  rejectBtn.onclick = () => {
+    socket.emit('reject_user', sid);
+    li.remove();
+  };
 
-    socket.on('user_joined', function() {
-      playPing();
-    });
+  li.appendChild(approveBtn);
+  li.appendChild(rejectBtn);
+  list.appendChild(li);
+});
 
-    // Enter to send message
-    document.getElementById('message').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
-    });
+// ===== USERNAME =====
 
-    // Enter to submit username
-    document.getElementById('username-input').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        submitUsername();
-      }
-    });
-  </script>
+function submitUsername() {
+  const input = document.getElementById('username-input');
+  const name = input.value.trim();
+
+  if (name) {
+    username = name;
+    socket.emit('join', username);
+    joined = true;
+  }
+}
+
+// ===== CHAT =====
+
+function sendMessage() {
+  const input = document.getElementById('message');
+  const text = input.value.trim();
+
+  if (text !== '') {
+    socket.send(username + ': ' + text);
+    input.value = '';
+  }
+}
+
+socket.on('message', function(msg) {
+  const messages = document.getElementById('messages');
+  const item = document.createElement('li');
+  item.textContent = msg;
+  messages.appendChild(item);
+  messages.scrollTop = messages.scrollHeight;
+});
+
+socket.on('user_list', function(list) {
+  const users = document.getElementById('users');
+  users.innerHTML = '';
+
+  list.forEach(u => {
+    const li = document.createElement('li');
+    li.textContent = u;
+    users.appendChild(li);
+  });
+});
+
+// Enter key support
+document.getElementById('message').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+document.getElementById('username-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitUsername();
+});
+</script>
 
 </body>
 </html>
