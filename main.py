@@ -12,6 +12,9 @@ socketio = SocketIO(app)
 chat_history = []
 users = {}
 
+host_sid = None
+pending_users = {}   # sid -> username
+approved_users = {}  # sid -> username
 
 @app.route('/')
 def index():
@@ -26,25 +29,62 @@ def handle_connect():
 
 @socketio.on('join')
 def handle_join(username):
-    users[request.sid] = username
+    global host_sid
+    sid = request.sid
+    if host_sid is None:
+        host_sid = sid
+        approved_users[sid] = username
+        emit('message', f'--- {username} (host) joined ---', broadcast=True)
+        emit('user_list', list(approved_users.values()), broadcast=True)
+        return
 
-    emit('message', f'--- {username} joined ---', broadcast=True)
-    emit('user_list', list(users.values()), broadcast=True)
-    emit('user_joined', broadcast=True)
+    pending_users[sid] = username
+
+    emit('waiting')
+    emit('approval_request', {
+        'sid': sid,
+        'username': username
+    }, room=host_sid)
+
+@socketio.on('approve_user')
+def approve_user(sid):
+    if sid in pending_users:
+        username = pending_users.pop(sid)
+        approved_users[sid] = username
+
+        emit('approved', room=sid)
+
+        emit('message', f'--- {username} joined ---', broadcast=True)
+        emit('user_list', list(approved_users.values()), broadcast=True)
+
+
+@socketio.on('reject_user')
+def reject_user(sid):
+    if sid in pending_users:
+        emit('rejected', room=sid)
+        pending_users.pop(sid)
 
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    username = users.get(request.sid)
-
+    global host_sid
+    sid = request.sid
+    username = approved_users.pop(sid, None) or pending_users.pop(sid, None)
+    if sid == host_sid:
+        if approved_users:
+            host_sid = next(iter(approved_users))
+            emit('message', f'--- New host assigned ---', room=host_sid)
+        else:
+            host_sid = None
     if username:
-        del users[request.sid]
         emit('message', f'--- {username} left ---', broadcast=True)
-        emit('user_list', list(users.values()), broadcast=True)
+        emit('user_list', list(approved_users.values()), broadcast=True)
 
 
 @socketio.on('message')
 def handle_message(msg):
+    if request.sid not in approved_users:
+        return
     chat_history.append(msg)
     send(msg, broadcast=True)
 
