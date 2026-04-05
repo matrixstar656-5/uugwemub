@@ -211,10 +211,10 @@ socket.on('message', function(msg) {
   const messages = document.getElementById('messages');
   const item = document.createElement('li');
   const imageRegex = /(https?:\/\/[^\s]+\.(png|jpg|jpeg|gif|webp)(\?[^\s]*)?)/gi;
-  if (imageRegex.test(msg)) {
+  if (msg.match(imageRegex)) {
     const parts = msg.split(imageRegex);
     parts.forEach(part => {
-      if (imageRegex.test(part)) {
+      if (part.match(imageRegex)) {
         const img = document.createElement('img');
         img.src = part;
         img.style.maxWidth = '300px';
