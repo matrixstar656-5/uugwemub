@@ -77,7 +77,7 @@
     }
 
     #requests {
-      display: block;
+      display: none;
     }
   </style>
 </head>
@@ -158,22 +158,25 @@ socket.on('you_are_host', () => {
 // ===== HOST REQUEST UI =====
 
 socket.on('approval_request', ({ sid, username }) => {
-  playPing();
   const list = document.getElementById('requests');
+
   const li = document.createElement('li');
   li.textContent = username + ' ';
+
   const approveBtn = document.createElement('button');
   approveBtn.textContent = '✔';
   approveBtn.onclick = () => {
     socket.emit('approve_user', sid);
     li.remove();
   };
+
   const rejectBtn = document.createElement('button');
   rejectBtn.textContent = '✖';
   rejectBtn.onclick = () => {
     socket.emit('reject_user', sid);
     li.remove();
   };
+
   li.appendChild(approveBtn);
   li.appendChild(rejectBtn);
   list.appendChild(li);
@@ -215,6 +218,10 @@ socket.on('message', function(msg) {
       const url = match[0];
       const textBefore = msg.slice(lastIndex, match.index);
       if (textBefore.trim()) {
+
+
+
+
         const span = document.createElement('span');
         span.textContent = textBefore;
         item.appendChild(span);
@@ -267,6 +274,4 @@ document.getElementById('username-input').addEventListener('keydown', e => {
 
 </body>
 </html>
-
-
 
