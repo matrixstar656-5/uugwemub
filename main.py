@@ -1,3 +1,12 @@
+import os
+import eventlet
+eventlet.monkey_patch()
+
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO, send, emit
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
 chat_history = []
@@ -11,7 +20,14 @@ approved_users = {}  # sid -> username
 @app.route('/')
 def index():
     return render_template('index.html')
-@@ -30,22 +30,33 @@ def handle_connect():
+
+
+@socketio.on('connect')
+def handle_connect():
+    for msg in chat_history:
+        send(msg)
+
+
 @socketio.on('join')
 def handle_join(username):
     global host_sid
@@ -45,7 +61,22 @@ def handle_join(username):
 @socketio.on('approve_user')
 def approve_user(sid):
     if sid in pending_users:
-@@ -68,14 +79,23 @@ def reject_user(sid):
+        username = pending_users.pop(sid)
+        approved_users[sid] = username
+
+        emit('approved', room=sid)
+
+        emit('message', f'--- {username} joined ---', broadcast=True)
+        emit('user_list', list(approved_users.values()), broadcast=True)
+
+
+@socketio.on('reject_user')
+def reject_user(sid):
+    if sid in pending_users:
+        emit('rejected', room=sid)
+        pending_users.pop(sid)
+
+
 @socketio.on('disconnect')
 def handle_disconnect():
     global host_sid
@@ -69,7 +100,8 @@ def handle_disconnect():
     if username:
         emit('message', f'--- {username} left ---', broadcast=True)
         emit('user_list', list(approved_users.values()), broadcast=True)
-@@ -84,12 +104,12 @@ def handle_disconnect():
+
+
 @socketio.on('message')
 def handle_message(msg):
     if request.sid not in approved_users:
