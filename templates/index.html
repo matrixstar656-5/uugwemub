@@ -158,6 +158,7 @@ socket.on('you_are_host', () => {
 // ===== HOST REQUEST UI =====
 
 socket.on('approval_request', ({ sid, username }) => {
+
   const list = document.getElementById('requests');
 
   const li = document.createElement('li');
@@ -218,10 +219,6 @@ socket.on('message', function(msg) {
       const url = match[0];
       const textBefore = msg.slice(lastIndex, match.index);
       if (textBefore.trim()) {
-
-
-
-
         const span = document.createElement('span');
         span.textContent = textBefore;
         item.appendChild(span);
@@ -274,4 +271,5 @@ document.getElementById('username-input').addEventListener('keydown', e => {
 
 </body>
 </html>
+
 
