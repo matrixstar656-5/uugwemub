@@ -35,9 +35,14 @@ def handle_join(username):
         host_sid = sid
         approved_users[sid] = username
         emit('you_are_host', room=sid)
+        for pending_sid, pending_name in pending_users.items():
+            emit('approval_request', {
+                'sid': pending_sid,
+                'username': pending_name
+            }, room=sid)
         emit('message', f'--- {username} (host) joined ---', broadcast=True)
         emit('user_list', list(approved_users.values()), broadcast=True)
-        return
+    return
     pending_users[sid] = username
     emit('waiting', room=sid)
     emit('approval_request', {
@@ -72,6 +77,11 @@ def handle_disconnect():
         if approved_users:
             host_sid = next(iter(approved_users))
             emit('you_are_host', room=host_sid)
+            for pending_sid, pending_name in pending_users.items():
+                    emit('approval_request', {
+                        'sid': pending_sid,
+                        'username': pending_name
+                    }, room=host_sid)
             emit('message', f'--- New host assigned ---', room=host_sid)
         else:
             host_sid = None
