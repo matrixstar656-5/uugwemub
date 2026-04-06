@@ -1,3 +1,11 @@
+import os
+import eventlet
+eventlet.monkey_patch()
+
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO, send, emit
+
+app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
@@ -92,8 +100,7 @@ def handle_disconnect():
     if username:
         emit('message', f'--- {username} left ---', broadcast=True)
         emit('user_list', list(approved_users.values()), broadcast=True)
-
-
+@@ -84,12 +104,12 @@
 @socketio.on('message')
 def handle_message(msg):
     if request.sid not in approved_users:
