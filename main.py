@@ -51,8 +51,9 @@ def handle_join(username):
 
     emit('waiting', room=sid)
 
+    print(f"Sending approval request for {username} to host {host_sid}")
     # Notify host
-    emit('approval_request', {
+    socketio.emit('approval_request', {
         'sid': sid,
         'username': username
     }, room=host_sid)
