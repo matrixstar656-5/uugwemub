@@ -1,11 +1,3 @@
-import os
-import eventlet
-eventlet.monkey_patch()
-
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO, send, emit
-
-app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
@@ -51,9 +43,8 @@ def handle_join(username):
 
     emit('waiting', room=sid)
 
-    print(f"Sending approval request for {username} to host {host_sid}")
     # Notify host
-    socketio.emit('approval_request', {
+    emit('approval_request', {
         'sid': sid,
         'username': username
     }, room=host_sid)
