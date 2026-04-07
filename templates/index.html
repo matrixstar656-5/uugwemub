@@ -213,28 +213,54 @@ function sendMessage() {
 socket.on('message', function(msg) {
   const messages = document.getElementById('messages');
   const item = document.createElement('li');
-  const imageRegex = /(https?:\/\/[^\s]+\.(png|jpg|jpeg|gif|webp)(\?[^\s]*)?)/gi;
+
+  const imageRegex = /(https?:\/\/[^\s]+\.(png|jpg|jpeg|gif|webp|mp4)(\?[^\s]*)?)/gi;
+
   let lastIndex = 0;
   let matches = [...msg.matchAll(imageRegex)];
+
   if (matches.length > 0) {
     matches.forEach(match => {
       const url = match[0];
+      const extension = url.split('.').pop().split('?')[0].toLowerCase();
+
       const textBefore = msg.slice(lastIndex, match.index);
       if (textBefore.trim()) {
         const span = document.createElement('span');
         span.textContent = textBefore;
         item.appendChild(span);
       }
-      const img = document.createElement('img');
-      img.src = url;
-      img.style.maxWidth = '500px';
-      img.style.display = 'block';
-      img.style.marginTop = '4px';
-      img.style.borderRadius = '6px';
-      img.loading = 'lazy';
-      img.onclick = () => window.open(img.src, '_blank');
-      img.style.cursor = 'pointer';
-      item.appendChild(img);
+
+      // IMAGE
+      if (['png','jpg','jpeg','gif','webp'].includes(extension)) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.style.maxWidth = '100%';
+        img.style.display = 'block';
+        img.style.marginTop = '4px';
+        img.style.borderRadius = '6px';
+        img.loading = 'lazy';
+        img.onclick = () => window.open(img.src, '_blank');
+        img.style.cursor = 'pointer';
+        item.appendChild(img);
+      }
+
+      // VIDEO (mp4)
+      else if (extension === 'mp4') {
+        const video = document.createElement('video');
+        video.src = url;
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.controls = false;
+        video.style.maxWidth = '100%';
+        video.style.display = 'block';
+        video.style.marginTop = '4px';
+        video.style.borderRadius = '6px';
+        item.appendChild(video);
+      }
+
       lastIndex = match.index + url.length;
     });
     const remaining = msg.slice(lastIndex);
@@ -243,9 +269,11 @@ socket.on('message', function(msg) {
       span.textContent = remaining;
       item.appendChild(span);
     }
+
   } else {
     item.textContent = msg;
   }
+
   messages.appendChild(item);
   messages.scrollTop = messages.scrollHeight;
 });
