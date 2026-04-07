@@ -31,6 +31,13 @@ def handle_connect():
 def handle_join(username):
     global host_sid
     sid = request.sid
+    for old_sid, name in list(approved_users.items()):
+        if name == username:
+            approved_users.pop(old_sid)
+            approved_users[sid] = username
+            emit('approved', room=sid)
+            emit('user_list', list(approved_users.values()), broadcast=True)
+            return
     if host_sid is None:
         host_sid = sid
         approved_users[sid] = username
