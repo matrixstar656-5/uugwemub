@@ -244,9 +244,28 @@ socket.on('message', function(msg) {
         img.loading = 'lazy';
         img.onclick = () => window.open(img.src, '_blank');
         img.style.cursor = 'pointer';
-
         img.onload = () => {
           messages.scrollTop = messages.scrollHeight;
+        };
+
+        img.onerror = () => {
+          const video = document.createElement('video');
+          video.src = url;
+          video.autoplay = true;
+          video.loop = true;
+          video.muted = true;
+          video.playsInline = true;
+          video.controls = false;
+          video.style.maxWidth = '100%';
+          video.style.display = 'block';
+          video.style.marginTop = '4px';
+          video.style.borderRadius = '6px';
+
+          video.onloadeddata = () => {
+            messages.scrollTop = messages.scrollHeight;
+          };
+
+          item.replaceChild(video, img);
         };
 
         item.appendChild(img);
