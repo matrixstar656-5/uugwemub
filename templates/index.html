@@ -86,7 +86,7 @@
 
 <div id="username-overlay">
   <div class="username-box">
-    <h2 id="overlay-text">Enter Username</h2>
+    <h2 id="overlay-text">Enter Coupon</h2>
     <input type="text" id="username-input" placeholder="Username" />
     <button onclick="submitUsername()">Enter</button>
   </div>
@@ -136,7 +136,7 @@ socket.on('connect', () => {
 // ===== STATES =====
 
 socket.on('waiting', () => {
-  overlayText.textContent = 'Waiting for approval...';
+  overlayText.textContent = 'Checking if youre gonna get the next day sale...';
 });
 
 socket.on('approved', () => {
