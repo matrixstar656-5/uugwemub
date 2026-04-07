@@ -222,7 +222,6 @@ socket.on('message', function(msg) {
   if (matches.length > 0) {
     matches.forEach(match => {
       const url = match[0];
-      const extension = url.split('.').pop().split('?')[0].toLowerCase();
 
       const textBefore = msg.slice(lastIndex, match.index);
       if (textBefore.trim()) {
@@ -231,8 +230,11 @@ socket.on('message', function(msg) {
         item.appendChild(span);
       }
 
+      const isImage = /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(url);
+      const isVideo = /\.mp4/i.test(url);
+
       // IMAGE
-      if (['png','jpg','jpeg','gif','webp'].includes(extension)) {
+      if (isImage) {
         const img = document.createElement('img');
         img.src = url;
         img.style.maxWidth = '100%';
@@ -242,14 +244,16 @@ socket.on('message', function(msg) {
         img.loading = 'lazy';
         img.onclick = () => window.open(img.src, '_blank');
         img.style.cursor = 'pointer';
+
         img.onload = () => {
           messages.scrollTop = messages.scrollHeight;
         };
+
         item.appendChild(img);
       }
 
-      // VIDEO (mp4)
-      else if (extension === 'mp4') {
+      // VIDEO
+      else if (isVideo) {
         const video = document.createElement('video');
         video.src = url;
         video.autoplay = true;
@@ -261,14 +265,17 @@ socket.on('message', function(msg) {
         video.style.display = 'block';
         video.style.marginTop = '4px';
         video.style.borderRadius = '6px';
+
         video.onloadeddata = () => {
           messages.scrollTop = messages.scrollHeight;
         };
+
         item.appendChild(video);
       }
 
       lastIndex = match.index + url.length;
     });
+
     const remaining = msg.slice(lastIndex);
     if (remaining.trim()) {
       const span = document.createElement('span');
