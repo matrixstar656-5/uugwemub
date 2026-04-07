@@ -36,6 +36,7 @@
       background: #000;
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       list-style: none;
       padding: 0;
       margin: 0;
@@ -44,6 +45,9 @@
 
     #messages li {
       padding: 4px 6px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .input-row {
