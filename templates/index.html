@@ -242,6 +242,9 @@ socket.on('message', function(msg) {
         img.loading = 'lazy';
         img.onclick = () => window.open(img.src, '_blank');
         img.style.cursor = 'pointer';
+        img.onload = () => {
+          messages.scrollTop = messages.scrollHeight;
+        };
         item.appendChild(img);
       }
 
@@ -258,6 +261,9 @@ socket.on('message', function(msg) {
         video.style.display = 'block';
         video.style.marginTop = '4px';
         video.style.borderRadius = '6px';
+        video.onloadeddata = () => {
+          messages.scrollTop = messages.scrollHeight;
+        };
         item.appendChild(video);
       }
 
