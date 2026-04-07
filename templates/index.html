@@ -128,9 +128,8 @@ const overlayText = document.getElementById('overlay-text');
 
 // Prevent duplicate joins
 socket.on('connect', () => {
-  if (username && !joined) {
+  if (username) {
     socket.emit('join', username);
-    joined = true;
   }
 });
 
