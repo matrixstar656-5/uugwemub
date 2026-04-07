@@ -214,7 +214,7 @@ socket.on('message', function(msg) {
   const messages = document.getElementById('messages');
   const item = document.createElement('li');
 
-  const imageRegex = /(https?:\/\/[^\s]+\.(png|jpg|jpeg|gif|webp|mp4)(\?[^\s]*)?)/gi;
+  const imageRegex = /(https?:\/\/[^\s]+(\.(png|jpg|jpeg|gif|webp|mp4)|gstatic\.com\/images\?q=[^\s]+))/gi;
 
   let lastIndex = 0;
   let matches = [...msg.matchAll(imageRegex)];
