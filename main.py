@@ -35,6 +35,7 @@ def handle_join(username):
     if username in approved_names:
         approved_users[sid] = username
         emit('approved', room=sid)
+        emit('message', f'--- {username} rejoined ---', broadcast=True)
         emit('user_list', list(approved_users.values()), broadcast=True)
         return
 
