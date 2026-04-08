@@ -14,6 +14,7 @@ chat_history = []
 host_sid = None
 pending_users = {}   # sid -> username
 approved_users = {}  # sid -> username
+approved_names = set()
 
 
 @app.route('/')
@@ -31,22 +32,26 @@ def handle_connect():
 def handle_join(username):
     global host_sid
     sid = request.sid
-    for old_sid, name in list(approved_users.items()):
-        if name == username:
-            approved_users.pop(old_sid)
-            approved_users[sid] = username
-            emit('approved', room=sid)
-            emit('user_list', list(approved_users.values()), broadcast=True)
-            return
+    if username in approved_names:
+        approved_users[sid] = username
+        emit('approved', room=sid)
+        emit('user_list', list(approved_users.values()), broadcast=True)
+        return
+
     if host_sid is None:
         host_sid = sid
         approved_users[sid] = username
+        approved_names.add(username)
+
         emit('you_are_host', room=sid)
         emit('message', f'--- {username} (host) joined ---', broadcast=True)
         emit('user_list', list(approved_users.values()), broadcast=True)
         return
+
+    # OTHERWISE → REQUEST APPROVAL
     pending_users[sid] = username
     emit('waiting', room=sid)
+
     emit('approval_request', {
         'sid': sid,
         'username': username
@@ -57,7 +62,10 @@ def handle_join(username):
 def approve_user(sid):
     if sid in pending_users:
         username = pending_users.pop(sid)
+
         approved_users[sid] = username
+        approved_names.add(username)
+
         emit('approved', room=sid)
         emit('message', f'--- {username} joined ---', broadcast=True)
         emit('user_list', list(approved_users.values()), broadcast=True)
@@ -74,7 +82,9 @@ def reject_user(sid):
 def handle_disconnect():
     global host_sid
     sid = request.sid
+
     username = approved_users.pop(sid, None) or pending_users.pop(sid, None)
+
     if sid == host_sid:
         if approved_users:
             host_sid = next(iter(approved_users))
@@ -82,6 +92,7 @@ def handle_disconnect():
             emit('message', f'--- New host assigned ---', room=host_sid)
         else:
             host_sid = None
+
     if username:
         emit('message', f'--- {username} left ---', broadcast=True)
         emit('user_list', list(approved_users.values()), broadcast=True)
@@ -91,6 +102,7 @@ def handle_disconnect():
 def handle_message(msg):
     if request.sid not in approved_users:
         return
+
     chat_history.append(msg)
     send(msg, broadcast=True)
 
