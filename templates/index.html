@@ -232,7 +232,7 @@ socket.on('message', function(msg) {
       }
 
       const isImage = /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(url);
-      const isVideo = /\.mp4/i.test(url);
+      const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(url);
 
       if (isYouTube) {
         const link = document.createElement('a');
