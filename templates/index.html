@@ -222,6 +222,7 @@ socket.on('message', function(msg) {
   if (matches.length > 0) {
     matches.forEach(match => {
       const url = match[0];
+      const isYouTube = /(?:youtube\.com|youtu\.be)/i.test(url);
 
       const textBefore = msg.slice(lastIndex, match.index);
       if (textBefore.trim()) {
@@ -233,8 +234,17 @@ socket.on('message', function(msg) {
       const isImage = /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(url);
       const isVideo = /\.mp4/i.test(url);
 
-      // IMAGE
-      if (isImage) {
+      if (isYouTube) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.textContent = url;
+        link.target = '_blank';
+        link.style.display = 'block';
+        link.style.marginTop = '4px';
+        item.appendChild(link);
+      }
+
+      else if (isImage) {
         const img = document.createElement('img');
         img.src = url;
         img.style.maxWidth = '100%';
@@ -244,34 +254,24 @@ socket.on('message', function(msg) {
         img.loading = 'lazy';
         img.onclick = () => window.open(img.src, '_blank');
         img.style.cursor = 'pointer';
+
         img.onload = () => {
-          messages.scrollTop = messages.scrollHeight;
+        messages.scrollTop = messages.scrollHeight;
         };
-
+      
         img.onerror = () => {
-          const video = document.createElement('video');
-          video.src = url;
-          video.autoplay = true;
-          video.loop = true;
-          video.muted = true;
-          video.playsInline = true;
-          video.controls = false;
-          video.style.maxWidth = '100%';
-          video.style.display = 'block';
-          video.style.marginTop = '4px';
-          video.style.borderRadius = '6px';
-
-          video.onloadeddata = () => {
-            messages.scrollTop = messages.scrollHeight;
-          };
-
-          item.replaceChild(video, img);
+          const fallback = document.createElement('a');
+          fallback.href = url;
+          fallback.textContent = url;
+          fallback.target = '_blank';
+          fallback.style.display = 'block';
+          fallback.style.marginTop = '4px';
+          item.replaceChild(fallback, img);
         };
 
         item.appendChild(img);
       }
 
-      // VIDEO
       else if (isVideo) {
         const video = document.createElement('video');
         video.src = url;
@@ -290,6 +290,16 @@ socket.on('message', function(msg) {
         };
 
         item.appendChild(video);
+      }
+
+      else {
+        const link = document.createElement('a');
+        link.href = url;
+        link.textContent = url;
+        link.target = '_blank';
+        link.style.display = 'block';
+        link.style.marginTop = '4px';
+        item.appendChild(link);
       }
 
       lastIndex = match.index + url.length;
