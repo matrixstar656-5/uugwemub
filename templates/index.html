@@ -256,7 +256,17 @@ socket.on('message', function(msg) {
         img.style.cursor = 'pointer';
 
         img.onload = () => {
-        messages.scrollTop = messages.scrollHeight;
+          const aspectRatio = img.naturalWidth / img.naturalHeight;
+
+          if (aspectRatio < 0.75) {
+            img.style.maxWidth = '35%';
+          } else if (aspectRatio < 1.2) {
+            img.style.maxWidth = '50%';
+          } else {
+            img.style.maxWidth = '80%';
+          }
+
+          messages.scrollTop = messages.scrollHeight;
         };
       
         img.onerror = () => {
@@ -285,7 +295,17 @@ socket.on('message', function(msg) {
         video.style.marginTop = '4px';
         video.style.borderRadius = '6px';
 
-        video.onloadeddata = () => {
+        video.onloadedmetadata = () => {
+          const aspectRatio = video.videoWidth / video.videoHeight;
+
+          if (aspectRatio < 0.75) {
+            video.style.maxWidth = '35%';
+          } else if (aspectRatio < 1.2) {
+            video.style.maxWidth = '50%';
+          } else {
+            video.style.maxWidth = '80%';
+          }
+
           messages.scrollTop = messages.scrollHeight;
         };
 
