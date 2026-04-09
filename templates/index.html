@@ -299,11 +299,13 @@ socket.on('message', function(msg) {
           const aspectRatio = video.videoWidth / video.videoHeight;
 
           if (aspectRatio < 0.75) {
-            video.style.maxWidth = '35%';
-          } else if (aspectRatio < 1.2) {
-            video.style.maxWidth = '50%';
+            video.style.maxWidth = '25%';
+          } else if (aspectRatio < 1.3) {
+            video.style.maxWidth = '37%';
+          } else if (aspectRatio < 2.3) {
+            video.style.maxWidth = '47%';
           } else {
-            video.style.maxWidth = '80%';
+            video.style.maxWidth = '65%';
           }
 
           messages.scrollTop = messages.scrollHeight;
