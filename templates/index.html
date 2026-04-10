@@ -247,6 +247,7 @@ socket.on('message', function(msg) {
       else if (isImage) {
         const img = document.createElement('img');
         img.src = url;
+        img.referrerPolicy = "no-referrer";
         img.style.maxWidth = '100%';
         img.style.display = 'block';
         img.style.marginTop = '4px';
