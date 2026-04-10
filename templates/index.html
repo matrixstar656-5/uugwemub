@@ -260,11 +260,13 @@ socket.on('message', function(msg) {
           const aspectRatio = img.naturalWidth / img.naturalHeight;
 
           if (aspectRatio < 0.75) {
-            img.style.maxWidth = '35%';
-          } else if (aspectRatio < 1.2) {
-            img.style.maxWidth = '50%';
+            img.style.maxWidth = '25%';
+          } else if (aspectRatio < 1.3) {
+            img.style.maxWidth = '37%';
+          } else if (aspectRatio < 2.3) {
+            img.style.maxWidth = '47%';
           } else {
-            img.style.maxWidth = '80%';
+            img.style.maxWidth = '65%';
           }
 
           messages.scrollTop = messages.scrollHeight;
