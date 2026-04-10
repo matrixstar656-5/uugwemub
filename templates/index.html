@@ -231,7 +231,7 @@ socket.on('message', function(msg) {
         item.appendChild(span);
       }
 
-      const isImage = /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(url);
+      const isImage = /\.(png|jpg|jpeg|gif|webp)(\/|\?|$)/i.test(url);
       const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(url);
 
       if (isYouTube) {
