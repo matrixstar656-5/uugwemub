@@ -222,7 +222,6 @@ socket.on('message', function(msg) {
   if (matches.length > 0) {
     matches.forEach(match => {
       const url = match[0];
-      const isYouTube = /(?:youtube\.com|youtu\.be)/i.test(url);
 
       const textBefore = msg.slice(lastIndex, match.index);
       if (textBefore.trim()) {
@@ -231,6 +230,7 @@ socket.on('message', function(msg) {
         item.appendChild(span);
       }
 
+      const isYouTube = /(?:youtube\.com|youtu\.be)/i.test(url);
       const isImage = /\.(png|jpg|jpeg|gif|webp)(\/|\?|$)/i.test(url);
       const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(url);
 
@@ -315,15 +315,30 @@ socket.on('message', function(msg) {
       }
 
       else {
-        const link = document.createElement('a');
-        link.href = url;
-        link.textContent = url;
-        link.target = '_blank';
-        link.style.display = 'block';
-        link.style.marginTop = '4px';
-        item.appendChild(link);
-      }
+        const testImg = document.createElement('img');
+        testImg.src = url;
 
+        testImg.onload = () => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.style.maxWidth = '80%';
+          img.style.display = 'block';
+          img.style.marginTop = '4px';
+          img.style.borderRadius = '6px';
+          item.appendChild(img);
+          messages.scrollTop = messages.scrollHeight;
+        };
+
+        testImg.onerror = () => {
+          const link = document.createElement('a');
+          link.href = url;
+          link.textContent = url;
+          link.target = '_blank';
+          link.style.display = 'block';
+          link.style.marginTop = '4px';
+          item.appendChild(link);
+        };
+      }
       lastIndex = match.index + url.length;
     });
 
