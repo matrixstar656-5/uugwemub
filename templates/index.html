@@ -313,7 +313,7 @@ socket.on('message', function(msg) {
             Boolean(video.webkitAudioDecodedByteCount) ||
             (video.audioTracks && video.audioTracks.length > 0);
 
-          if (video.duration > 20 || hasAudio) {
+          if (video.duration > 15 || hasAudio) {
             video.controls = true;
             video.autoplay = false;
             video.loop = false;
@@ -324,6 +324,21 @@ socket.on('message', function(msg) {
             video.loop = true;
             video.muted = true;
             video.play();
+
+            setTimeout(() => {
+              const chromeDetectedAudio =
+                Boolean(video.webkitAudioDecodedByteCount) &&
+                video.webkitAudioDecodedByteCount > 0;
+
+              if (chromeDetectedAudio) {
+                video.pause();
+                video.controls = true;
+                video.autoplay = false;
+                video.loop = false;
+                video.muted = false;
+                video.currentTime = 0;
+              }
+            }, 700);
           }
 
           messages.scrollTop = messages.scrollHeight;
