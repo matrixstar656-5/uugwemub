@@ -309,6 +309,24 @@ socket.on('message', function(msg) {
             video.style.maxWidth = '65%';
           }
 
+          const hasAudio =
+            video.mozHasAudio ||
+            Boolean(video.webkitAudioDecodedByteCount) ||
+            (video.audioTracks && video.audioTracks.length > 0);
+
+          if (video.duration > 20 || hasAudio) {
+            video.controls = true;
+            video.autoplay = false;
+            video.loop = false;
+            video.muted = false;
+          } else {
+            video.controls = false;
+            video.autoplay = true;
+            video.loop = true;
+            video.muted = true;
+            video.play();
+          }
+
           messages.scrollTop = messages.scrollHeight;
         };
 
