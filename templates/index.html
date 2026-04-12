@@ -253,8 +253,7 @@ socket.on('message', function(msg) {
         img.style.marginTop = '4px';
         img.style.borderRadius = '6px';
         img.loading = 'lazy';
-        img.onclick = () => window.open(img.src, '_blank');
-        img.style.cursor = 'pointer';
+        img.style.cursor = 'default';
 
         img.onload = () => {
           const aspectRatio = img.naturalWidth / img.naturalHeight;
@@ -370,6 +369,7 @@ socket.on('message', function(msg) {
           img.style.display = 'block';
           img.style.marginTop = '4px';
           img.style.borderRadius = '6px';
+          img.style.cursor = 'default';
           item.appendChild(img);
           messages.scrollTop = messages.scrollHeight;
         };
